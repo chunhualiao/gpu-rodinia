@@ -1,3 +1,28 @@
+/*
+BFS Algorithm is from the paper: 
+
+P. Harish and P. Narayanan. Accelerating large graph algorithms on the GPU using CUDA. 
+In Proceedings of 2007 International Conference on High Performance Computing, Dec 2007.
+
+" We solve the BFS problem using level synchronization. BFS traverses the graph in levels; once a level is visited it is not visited again. 
+
+The BFS frontier corresponds to all the nodes being processed at the current level. 
+* We do not maintain a queue for each vertex during our BFS execution because it will incur additional overheads of maintaining new array indices and changing the grid configuration at every level of kernel execution. 
+** This slows down the speed of execution on the CUDA model.
+* For our implementation we give one thread to every vertex. 
+** Two boolean arrays, frontier and visited, Fa and Xa respectively, of size jVj are created which store the BFS frontier and the visited vertices. 
+** Another integer array, cost, Ca, stores the minimal number of edges of each vertex from the source vertex S. 
+
+In each iteration, each vertex looks at its entry in the frontier array Fa. 
+* If true, it fetches its cost from the cost array Ca and updates all the costs of its neighbors if more than its own cost plus one using
+the edge list Ea. 
+* The vertex removes its own entry from the frontier array Fa and adds to the visited array Xa. 
+* It also adds its neighbors to the frontier array if the neighbor is not already visited. 
+
+This process is repeated until the frontier is empty. This algorithm needs iterations of order of the diameter of the graph G(V;E) in the worst case.
+"
+
+*/
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -121,7 +146,9 @@ void BFSGraph( int argc, char** argv)
         {
 #endif 
 #endif
-	bool stop;
+// This is a confusing variable name: 
+// It really means if there are nodes at the next level of graph in the context level-by-level traversal of BFS 
+	bool stop; 
 	do
         {
             //if no thread changes this value then the loop stops
@@ -144,7 +171,7 @@ void BFSGraph( int argc, char** argv)
                         if(!h_graph_visited[id])
                         {
                             h_cost[id]=h_cost[tid]+1;
-                            h_updating_graph_mask[id]=true;
+                            h_updating_graph_mask[id]=true;  // mark the neighbor nodes as candidates of next level of traversal
                         }
                     }
                 }
@@ -156,11 +183,11 @@ void BFSGraph( int argc, char** argv)
     #endif
     #pragma omp parallel for
 #endif
-            for(int tid=0; tid< no_of_nodes ; tid++ )
+            for(int tid=0; tid< no_of_nodes ; tid++ )  // transfer the value of h_updating_graph_mask to h_graph_mask, also update h_graph_visited
             {
                 if (h_updating_graph_mask[tid] == true){
                     h_graph_mask[tid]=true;
-                    h_graph_visited[tid]=true;
+                    h_graph_visited[tid]=true; // this can be moved into the previous loop.
                     stop=true;
                     h_updating_graph_mask[tid]=false;
                 }
@@ -176,6 +203,7 @@ void BFSGraph( int argc, char** argv)
 #endif
 #endif
 	//Store the result into a file
+	// The cost is the number of edges from source node to other nodes: the height of the BFS.
 	FILE *fpo = fopen("result.txt","w");
 	for(int i=0;i<no_of_nodes;i++)
 		fprintf(fpo,"%d) cost:%d\n",i,h_cost[i]);
