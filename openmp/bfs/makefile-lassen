@@ -1,7 +1,7 @@
 # C compiler
-CC = clang
+CC = clang++
 
-CC_FLAGS = -g -fopenmp -O2
+CC_FLAGS = -g -Wall -fopenmp -O2
 
 all: bfs bfs_offload
 
@@ -12,4 +12,4 @@ bfs_offload: bfs.cpp
 	$(CC) $(CC_FLAGS) -fopenmp-targets=nvptx64 bfs.cpp -o bfs_offload
 
 clean:
-	rm -f bfs bfs_offload result.txt
+	rm -f bfs bfs_offload result*.txt

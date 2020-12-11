@@ -47,14 +47,15 @@ input_file's content: store nodes, edges and costs
 
 Documented by C. Liao, 2020
 */
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <string>
 #include <math.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <omp.h>
 //#define NUM_THREAD 4
 #define OPEN
 
+using namespace std;
 
 FILE *fp;
 
@@ -245,13 +246,15 @@ void BFSGraph( int argc, char** argv)
         }
 #endif
 #endif
+	string output_file="result_";
+	output_file+=to_string(no_of_nodes)+".txt";
 	//Store the result into a file
 	// The cost is the number of edges from source node to other nodes: the height of the BFS.
-	FILE *fpo = fopen("result.txt","w");
+	FILE *fpo = fopen(output_file.c_str(),"w");
 	for(int i=0;i<no_of_nodes;i++)
 		fprintf(fpo,"%d) cost:%d\n",i,h_cost[i]);
 	fclose(fpo);
-	printf("Result stored in result.txt\n");
+	printf("Result stored in %s\n", output_file.c_str());
 
 
 	// cleanup memory

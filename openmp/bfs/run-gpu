@@ -1,0 +1,7 @@
+./bfs_offload 32 ../../data/bfs/graph4096.txt
+./bfs_offload 32 ../../data/bfs/graph65536.txt
+./bfs_offload 32 ../../data/bfs/graph1MW_6.txt 
+
+diff reference_results/result_1000000.txt result_1000000.txt || echo "wrong results"
+diff reference_results/result_65536.txt result_65536.txt || echo "wrong results"     
+diff reference_results/result_4096.txt result_4096.txt  || echo "wrong results"
