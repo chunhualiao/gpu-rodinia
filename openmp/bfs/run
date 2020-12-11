@@ -1,3 +1,19 @@
 ./bfs 32 ../../data/bfs/graph4096.txt
 ./bfs 32 ../../data/bfs/graph65536.txt
 ./bfs 32 ../../data/bfs/graph1MW_6.txt 
+
+./bfs 32 ../../data/bfs/inputGen/graph128k.txt
+./bfs 32 ../../data/bfs/inputGen/graph16M.txt
+./bfs 32 ../../data/bfs/inputGen/graph16k.txt
+./bfs 32 ../../data/bfs/inputGen/graph1M.txt
+./bfs 32 ../../data/bfs/inputGen/graph1k.txt
+./bfs 32 ../../data/bfs/inputGen/graph256k.txt
+./bfs 32 ../../data/bfs/inputGen/graph2M.txt
+./bfs 32 ../../data/bfs/inputGen/graph2k.txt
+./bfs 32 ../../data/bfs/inputGen/graph32k.txt
+./bfs 32 ../../data/bfs/inputGen/graph4M.txt
+./bfs 32 ../../data/bfs/inputGen/graph4k.txt
+./bfs 32 ../../data/bfs/inputGen/graph512k.txt
+./bfs 32 ../../data/bfs/inputGen/graph64k.txt
+./bfs 32 ../../data/bfs/inputGen/graph8M.txt
+./bfs 32 ../../data/bfs/inputGen/graph8k.txt

@@ -124,6 +124,7 @@ void BFSGraph( int argc, char** argv)
 	bool *h_graph_mask = (bool*) malloc(sizeof(bool)*no_of_nodes);
 	total_mem += sizeof(bool)*no_of_nodes;
 
+
 	// flags to mark next level's nodes: children of current level's nodes
 	bool *h_updating_graph_mask = (bool*) malloc(sizeof(bool)*no_of_nodes);
 	total_mem += sizeof(bool)*no_of_nodes;

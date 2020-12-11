@@ -1,0 +1,107 @@
+Reading File
+Start traversing the tree using 32 threads
+Node count=4096, Edge count=24576, Memory Footprint=156 k bytes
+Compute time: 0.019452 seconds 
+Result stored in result_4096.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=65536, Edge count=393216, Memory Footprint=2496 k bytes
+Compute time: 0.019126 seconds 
+Result stored in result_65536.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=1000000, Edge count=5999970, Memory Footprint=38085 k bytes
+Compute time: 0.024199 seconds 
+Result stored in result_1000000.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=131072, Edge count=786514, Memory Footprint=4992 k bytes
+Compute time: 0.020482 seconds 
+Result stored in result_131072.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=16777216, Edge count=100649908, Memory Footprint=638923 k bytes
+Compute time: 0.227013 seconds 
+Result stored in result_16777216.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=16384, Edge count=98376, Memory Footprint=624 k bytes
+Compute time: 0.019973 seconds 
+Result stored in result_16384.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=1048576, Edge count=6291224, Memory Footprint=39935 k bytes
+Compute time: 0.025757 seconds 
+Result stored in result_1048576.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=1024, Edge count=6186, Memory Footprint=39 k bytes
+Compute time: 0.018786 seconds 
+Result stored in result_1024.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=261444, Edge count=1568742, Memory Footprint=9957 k bytes
+Compute time: 0.020816 seconds 
+Result stored in result_261444.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=2097152, Edge count=12582338, Memory Footprint=79869 k bytes
+Compute time: 0.035560 seconds 
+Result stored in result_2097152.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=2048, Edge count=12368, Memory Footprint=78 k bytes
+Compute time: 0.019485 seconds 
+Result stored in result_2048.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=32768, Edge count=196286, Memory Footprint=1246 k bytes
+Compute time: 0.018750 seconds 
+Result stored in result_32768.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=4194304, Edge count=25165584, Memory Footprint=159743 k bytes
+Compute time: 0.051663 seconds 
+Result stored in result_4194304.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=4096, Edge count=24612, Memory Footprint=156 k bytes
+Compute time: 0.020208 seconds 
+Result stored in result_4096.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=524288, Edge count=3148680, Memory Footprint=19979 k bytes
+Compute time: 0.022232 seconds 
+Result stored in result_524288.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=65536, Edge count=393330, Memory Footprint=2496 k bytes
+Compute time: 0.019301 seconds 
+Result stored in result_65536.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=8388608, Edge count=50334842, Memory Footprint=319500 k bytes
+Compute time: 0.099389 seconds 
+Result stored in result_8388608.txt
+
+Reading File
+Start traversing the tree using 32 threads
+Node count=8192, Edge count=49286, Memory Footprint=312 k bytes
+Compute time: 0.019800 seconds 
+Result stored in result_8192.txt
