@@ -22,6 +22,30 @@ the edge list Ea.
 This process is repeated until the frontier is empty. This algorithm needs iterations of order of the diameter of the graph G(V;E) in the worst case.
 "
 
+input_file's content: store nodes, edges and costs
+---------------------
+100  // number of nodes
+0 7  // each row is for one node, starting from node 0: two numbers: first one the start id of its first edge, second number:total edges of the node
+7 3
+10 7
+
+...
+559 8 
+567 5  // last node's first edge id, and total edge count
+
+24 // start node's id: source node id
+
+572  // total number of edges: this should last node's first edge id+ edge count: 567+5=572
+0 8 // each row now is for one edge, starting from edge id=0, first number: destination node id, second number: cost of the edge
+0 8
+20 10
+..
+
+17 2
+73 5
+
+
+Documented by C. Liao, 2020
 */
 #include <stdio.h>
 #include <string.h>
@@ -89,11 +113,23 @@ void BFSGraph( int argc, char** argv)
 
 	fscanf(fp,"%d",&no_of_nodes);
    
+	int total_mem=0; 
+
 	// allocate host memory
 	Node* h_graph_nodes = (Node*) malloc(sizeof(Node)*no_of_nodes);
+	total_mem += sizeof(Node)*no_of_nodes;
+
+	// flags to indicate if a node is the current level of nodes in the BFS traversal
 	bool *h_graph_mask = (bool*) malloc(sizeof(bool)*no_of_nodes);
+	total_mem += sizeof(bool)*no_of_nodes;
+
+	// flags to mark next level's nodes: children of current level's nodes
 	bool *h_updating_graph_mask = (bool*) malloc(sizeof(bool)*no_of_nodes);
+	total_mem += sizeof(bool)*no_of_nodes;
+
+	// if a node is visited or not
 	bool *h_graph_visited = (bool*) malloc(sizeof(bool)*no_of_nodes);
+	total_mem += sizeof(bool)*no_of_nodes;
 
 	int start, edgeno;   
 	// initalize the memory
@@ -119,6 +155,7 @@ void BFSGraph( int argc, char** argv)
 
 	int id,cost;
 	int* h_graph_edges = (int*) malloc(sizeof(int)*edge_list_size);
+	total_mem += sizeof(int)*edge_list_size;
 	for(int i=0; i < edge_list_size ; i++)
 	{
 		fscanf(fp,"%d",&id);
@@ -132,15 +169,19 @@ void BFSGraph( int argc, char** argv)
 
 	// allocate mem for the result on host side
 	int* h_cost = (int*) malloc( sizeof(int)*no_of_nodes);
+	total_mem += sizeof(int)*no_of_nodes;
+
 	for(int i=0;i<no_of_nodes;i++)
 		h_cost[i]=-1;
 	h_cost[source]=0;
 	
-	printf("Start traversing the tree\n");
+	printf("Start traversing the tree using %d threads\n", num_omp_threads);
+	printf ("Node count=%d, Edge count=%d, Memory Footprint=%d k bytes\n", no_of_nodes, edge_list_size, total_mem/1024);
 	
 	int k=0;
 #ifdef OPEN
         double start_time = omp_get_wtime();
+        omp_set_num_threads(num_omp_threads);
 #ifdef OMP_OFFLOAD
 #pragma omp target data map(to: no_of_nodes, h_graph_mask[0:no_of_nodes], h_graph_nodes[0:no_of_nodes], h_graph_edges[0:edge_list_size], h_graph_visited[0:no_of_nodes], h_updating_graph_mask[0:no_of_nodes]) map(h_cost[0:no_of_nodes])
         {
@@ -157,9 +198,10 @@ void BFSGraph( int argc, char** argv)
 #ifdef OPEN
             //omp_set_num_threads(num_omp_threads);
     #ifdef OMP_OFFLOAD
-    #pragma omp target
-    #endif
+    #pragma omp target teams distributed parallel for
+    #else	    
     #pragma omp parallel for 
+    #endif
 #endif 
             for(int tid = 0; tid < no_of_nodes; tid++ )
             {
@@ -179,9 +221,10 @@ void BFSGraph( int argc, char** argv)
 
 #ifdef OPEN
     #ifdef OMP_OFFLOAD
-    #pragma omp target map(stop)
-    #endif
+    #pragma omp target teams distributed parallel for map(stop)
+    #else	    
     #pragma omp parallel for
+    #endif
 #endif
             for(int tid=0; tid< no_of_nodes ; tid++ )  // transfer the value of h_updating_graph_mask to h_graph_mask, also update h_graph_visited
             {
@@ -197,7 +240,7 @@ void BFSGraph( int argc, char** argv)
 	while(stop);
 #ifdef OPEN
         double end_time = omp_get_wtime();
-        printf("Compute time: %lf\n", (end_time - start_time));
+        printf("Compute time: %lf seconds \n", (end_time - start_time));
 #ifdef OMP_OFFLOAD
         }
 #endif
