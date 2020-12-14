@@ -15,7 +15,8 @@
  *
  * Example:
  *  ./graphgen 8192 8k
- * It will generate graph6k.txt
+ * It will generate graph8k.txt, storing a graph with 8k nodes. 
+ *
  * This program uses the TR1 header <random>.
  *
  */
