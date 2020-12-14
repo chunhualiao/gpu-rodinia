@@ -1,15 +1,15 @@
 # C compiler
-CC = g++
-ICC = icc
-CC_FLAGS = -g -fopenmp -O2
+CC = clang++
+
+CC_FLAGS = -g -Wall -fopenmp -O2
 
 all: bfs bfs_offload
 
-bfs: bfs.cpp 
-	$(CC) $(CC_FLAGS) bfs.cpp -o bfs 
+bfs: bfs.cpp graphgen.cpp
+	$(CC) $(CC_FLAGS) $^ -o bfs 
 
-bfs_offload: bfs.cpp
-	$(ICC) $(CC_FLAGS) -DOMP_OFFLOAD bfs.cpp -o bfs_offload
+bfs_offload: bfs.cpp graphgen.cpp
+	$(CC) $(CC_FLAGS) -fopenmp-targets=nvptx64 $^  -o bfs_offload
 
 clean:
 	rm -f bfs bfs_offload result*.txt

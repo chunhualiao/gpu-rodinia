@@ -23,6 +23,7 @@ This process is repeated until the frontier is empty. This algorithm needs itera
 "
 
 input_file's content: store nodes, edges and costs
+* undirected graph using adjacent lists representation.
 ---------------------
 100  // number of nodes
 0 7  // each row is for one node, starting from node 0: two numbers: first one the start id of its first edge, second number:total edges of the node
@@ -52,6 +53,7 @@ Documented by C. Liao, 2020
 #include <math.h>
 #include <cstdlib>
 #include <omp.h>
+
 //#define NUM_THREAD 4
 #define OPEN
 
@@ -66,13 +68,80 @@ struct Node
 	int no_of_edges;
 };
 
+// a function provided by another file
+extern void generate_random_graph (int no_of_nodes, int & edge_list_size, Node*& h_graph_nodes, int*& h_graph_edges, int& source, int & total_mem);
+
 void BFSGraph(int argc, char** argv);
 
 void Usage(int argc, char**argv){
 
-fprintf(stderr,"Usage: %s <num_threads> <input_file>\n", argv[0]);
+  fprintf(stderr,"Usage: %s <num_threads> <graph_input_file>\n", argv[0]);
+  fprintf(stderr,"Usage: %s <num_threads> -buildin-graph-generator <graph_node_count>\n", argv[0]);
 
 }
+////////////////////////////////////////////////////////////////////////////////
+// Read or Generate a Random Graph
+////////////////////////////////////////////////////////////////////////////////
+//   input parameters:
+//      	char* input_f
+//  
+//   output parameters:
+//       int no_of_nodes // node count
+//       int edge_list_size  // edge count
+//       Node* h_graph_nodes  // graph nodes, with information filled up
+//       int* h_graph_edges  // edges with dest node id and cost (ignored)
+//       int source // source node id
+//       int total_mem   // memory accumulated so far
+void read_graph_file (char* input_f, int& no_of_nodes, int & edge_list_size, Node*& h_graph_nodes, int*& h_graph_edges, int& source, int & total_mem)
+{
+  printf("Reading File\n");
+  //Read in Graph from a file
+  fp = fopen(input_f,"r");
+  if(!fp)
+  {
+    printf("Error Reading graph file\n");
+    return;
+  }
+
+  fscanf(fp,"%d",&no_of_nodes);
+
+  // allocate host memory
+  h_graph_nodes = (Node*) malloc(sizeof(Node)*no_of_nodes);
+  total_mem += sizeof(Node)*no_of_nodes;
+
+  int start, edgeno;   
+  // initalize the memory
+  for( unsigned int i = 0; i < no_of_nodes; i++) 
+  {
+    fscanf(fp,"%d %d",&start,&edgeno);
+    h_graph_nodes[i].starting = start;
+    h_graph_nodes[i].no_of_edges = edgeno;
+    //	h_graph_mask[i]=false;
+    //	h_updating_graph_mask[i]=false;
+    //	h_graph_visited[i]=false;
+  }
+
+  //read the source node from the file
+  fscanf(fp,"%d",&source);
+  // source=0; //tesing code line
+
+
+  fscanf(fp,"%d",&edge_list_size);
+
+  int id,cost;
+  h_graph_edges = (int*) malloc(sizeof(int)*edge_list_size);
+  total_mem += sizeof(int)*edge_list_size;
+  for(int i=0; i < edge_list_size ; i++)
+  {
+    fscanf(fp,"%d",&id);
+    fscanf(fp,"%d",&cost);
+    h_graph_edges[i] = id;
+  }
+
+  if(fp)
+    fclose(fp);    
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Main Program
 ////////////////////////////////////////////////////////////////////////////////
@@ -81,10 +150,8 @@ int main( int argc, char** argv)
 	BFSGraph( argc, argv);
 }
 
-
-
 ////////////////////////////////////////////////////////////////////////////////
-//Apply BFS on a Graph using CUDA
+//Apply BFS on a Graph
 ////////////////////////////////////////////////////////////////////////////////
 void BFSGraph( int argc, char** argv) 
 {
@@ -92,82 +159,51 @@ void BFSGraph( int argc, char** argv)
         int edge_list_size = 0;
         char *input_f;
 	int	 num_omp_threads;
+	int total_mem=0; 
 	
-	if(argc!=3){
-	Usage(argc, argv);
-	exit(0);
+	if(argc!=3 && argc!=4){
+	  Usage(argc, argv);
+	  exit(0);
 	}
     
 	num_omp_threads = atoi(argv[1]);
 	input_f = argv[2];
 	
-	printf("Reading File\n");
-	//Read in Graph from a file
-	fp = fopen(input_f,"r");
-	if(!fp)
-	{
-		printf("Error Reading graph file\n");
-		return;
-	}
-
 	int source = 0;
 
-	fscanf(fp,"%d",&no_of_nodes);
-   
-	int total_mem=0; 
+	Node* h_graph_nodes=NULL;
+	int* h_graph_edges=NULL; 
 
-	// allocate host memory
-	Node* h_graph_nodes = (Node*) malloc(sizeof(Node)*no_of_nodes);
-	total_mem += sizeof(Node)*no_of_nodes;
-
+       // reading the graph from a file
+      // ----------------------------
+        if (argc==3) // preserve original semantics of reading a graph from a text file 
+          read_graph_file (input_f, no_of_nodes, edge_list_size, h_graph_nodes, h_graph_edges, source, total_mem);  
+	else // argc ==4 
+	{
+	  no_of_nodes = strtoul( argv[3], NULL, 10 );
+	  generate_random_graph(no_of_nodes, edge_list_size, h_graph_nodes, h_graph_edges, source, total_mem);
+	}
+	
 	// flags to indicate if a node is the current level of nodes in the BFS traversal
 	bool *h_graph_mask = (bool*) malloc(sizeof(bool)*no_of_nodes);
+	memset(h_graph_mask, 0, sizeof(bool)*no_of_nodes);
 	total_mem += sizeof(bool)*no_of_nodes;
 
 
 	// flags to mark next level's nodes: children of current level's nodes
 	bool *h_updating_graph_mask = (bool*) malloc(sizeof(bool)*no_of_nodes);
+	memset(h_updating_graph_mask, 0, sizeof(bool)*no_of_nodes);
 	total_mem += sizeof(bool)*no_of_nodes;
 
-	// if a node is visited or not
+	// flags: if a node is visited or not
 	bool *h_graph_visited = (bool*) malloc(sizeof(bool)*no_of_nodes);
+	memset(h_graph_visited, 0, sizeof(bool)*no_of_nodes);
 	total_mem += sizeof(bool)*no_of_nodes;
 
-	int start, edgeno;   
-	// initalize the memory
-	for( unsigned int i = 0; i < no_of_nodes; i++) 
-	{
-		fscanf(fp,"%d %d",&start,&edgeno);
-		h_graph_nodes[i].starting = start;
-		h_graph_nodes[i].no_of_edges = edgeno;
-		h_graph_mask[i]=false;
-		h_updating_graph_mask[i]=false;
-		h_graph_visited[i]=false;
-	}
-
-	//read the source node from the file
-	fscanf(fp,"%d",&source);
-	// source=0; //tesing code line
 
 	//set the source node as true in the mask
 	h_graph_mask[source]=true;
 	h_graph_visited[source]=true;
-
-	fscanf(fp,"%d",&edge_list_size);
-
-	int id,cost;
-	int* h_graph_edges = (int*) malloc(sizeof(int)*edge_list_size);
-	total_mem += sizeof(int)*edge_list_size;
-	for(int i=0; i < edge_list_size ; i++)
-	{
-		fscanf(fp,"%d",&id);
-		fscanf(fp,"%d",&cost);
-		h_graph_edges[i] = id;
-	}
-
-	if(fp)
-		fclose(fp);    
-
 
 	// allocate mem for the result on host side
 	int* h_cost = (int*) malloc( sizeof(int)*no_of_nodes);

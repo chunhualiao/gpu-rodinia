@@ -1,6 +1,6 @@
 Documented by C. Liao, 12/14/2020
 
-A directed graph is represented as adjacent lists
+A undirected graph is represented as adjacent lists
 * each node is randomly connected to another node
 * each edge has a weight associated. 
 

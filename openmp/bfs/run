@@ -2,18 +2,28 @@
 ./bfs 32 ../../data/bfs/graph65536.txt
 ./bfs 32 ../../data/bfs/graph1MW_6.txt 
 
-./bfs 32 ../../data/bfs/inputGen/graph128k.txt
-./bfs 32 ../../data/bfs/inputGen/graph16M.txt
-./bfs 32 ../../data/bfs/inputGen/graph16k.txt
-./bfs 32 ../../data/bfs/inputGen/graph1M.txt
-./bfs 32 ../../data/bfs/inputGen/graph1k.txt
-./bfs 32 ../../data/bfs/inputGen/graph256k.txt
-./bfs 32 ../../data/bfs/inputGen/graph2M.txt
-./bfs 32 ../../data/bfs/inputGen/graph2k.txt
-./bfs 32 ../../data/bfs/inputGen/graph32k.txt
-./bfs 32 ../../data/bfs/inputGen/graph4M.txt
-./bfs 32 ../../data/bfs/inputGen/graph4k.txt
-./bfs 32 ../../data/bfs/inputGen/graph512k.txt
-./bfs 32 ../../data/bfs/inputGen/graph64k.txt
-./bfs 32 ../../data/bfs/inputGen/graph8M.txt
-./bfs 32 ../../data/bfs/inputGen/graph8k.txt
+# check against reference results
+diff reference_results/result_4096.txt result_4096.txt  || echo "wrong results"
+diff reference_results/result_65536.txt result_65536.txt || echo "wrong results"
+diff reference_results/result_1000000.txt result_1000000.txt || echo "wrong results"
+
+# using 
+./bfs 32 -buildin-graph-generator 4096
+./bfs 32 -buildin-graph-generator 65536
+./bfs 32 -buildin-graph-generator 1000000 
+
+#./bfs 32 ../../data/bfs/inputGen/graph128k.txt
+#./bfs 32 ../../data/bfs/inputGen/graph16M.txt
+#./bfs 32 ../../data/bfs/inputGen/graph16k.txt
+#./bfs 32 ../../data/bfs/inputGen/graph1M.txt
+#./bfs 32 ../../data/bfs/inputGen/graph1k.txt
+#./bfs 32 ../../data/bfs/inputGen/graph256k.txt
+#./bfs 32 ../../data/bfs/inputGen/graph2M.txt
+#./bfs 32 ../../data/bfs/inputGen/graph2k.txt
+#./bfs 32 ../../data/bfs/inputGen/graph32k.txt
+#./bfs 32 ../../data/bfs/inputGen/graph4M.txt
+#./bfs 32 ../../data/bfs/inputGen/graph4k.txt
+#./bfs 32 ../../data/bfs/inputGen/graph512k.txt
+#./bfs 32 ../../data/bfs/inputGen/graph64k.txt
+#./bfs 32 ../../data/bfs/inputGen/graph8M.txt
+#./bfs 32 ../../data/bfs/inputGen/graph8k.txt
