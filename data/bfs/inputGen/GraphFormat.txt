@@ -1,0 +1,29 @@
+Documented by C. Liao, 12/14/2020
+
+A directed graph is represented as adjacent lists
+* each node is randomly connected to another node
+* each edge has a weight associated. 
+
+File format to store a graph, two two lists
+* list of nodes: with node id 0 to m-1
+  
+* list of edges: with edge id 0 to n-1
+  each node's edges are stored together to ensure data locality using BFS traversal
+
+  
+line 1: 100  // number of nodes
+line 2: 0 7  // node id 0: start edge id is 0, with total 7 edges
+line 3: 7 3  // node id 1: start edge id 7, total 3 edges
+..
+line x: 567 5 // node id x-1: start edge id 567, total 5 edges
+             // space
+line y:   24   // source node's id is 24, we calculate distance from node 24 to all others
+..
+         572   // total number of edges
+	 0 8   // edge id 0: destination node id is 0, with weight 8
+	 0 8    // edge id 1: destination node id is 0, weight 8
+	 20 10  // edge id 2: destination node id is 20, weight 10
+...
+         73 5   // edge id 570, destination node id 73, weight 5
+ 
+
