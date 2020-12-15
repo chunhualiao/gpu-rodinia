@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <climits>
+#include <omp.h>
 
 // These names may vary by implementation
 #if __GNUC__ 
@@ -27,13 +28,7 @@ using namespace std;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
-// interal graph's edge
-struct edge {
-  ulong dest; // destination node's ID
-  uint weight;
-};
-
-//Structure to hold a node information
+//Final Structure to hold a node information
 struct Node
 {
         int starting;
@@ -42,8 +37,14 @@ struct Node
 
 //------------end for random graph generation
 
-void generate_random_graph (int no_of_nodes, int & edge_list_size, Node*& h_graph_nodes, int*& h_graph_edges, int& source, int & total_mem)
+void generate_random_graph (int no_of_nodes, int & edge_list_size, Node*& h_graph_nodes, int*& h_graph_edges, int& source, size_t & total_mem)
 {
+  // interal graph's edge
+  struct edge {
+    ulong dest; // destination node's ID
+    uint weight;
+  };
+
   printf("Generating a random undirected graph with %d nodes\n", no_of_nodes);
   if ( no_of_nodes < MIN_NODES || no_of_nodes > MAX_NODES)
   { 
@@ -53,10 +54,15 @@ void generate_random_graph (int no_of_nodes, int & edge_list_size, Node*& h_grap
 
   // Step 1: First generate a temporary graph
 
+  double start_time, end_time;
+  start_time = omp_get_wtime();
   // Adjacent list graph representation: each node has a list of linked nodes through edges
   typedef vector<edge> node;
   node * graph;
   graph = new node[no_of_nodes];
+
+  total_mem += sizeof(node)*no_of_nodes;
+  printf ("Adding Temp Node count=%d, Memory Footprint=%zu k bytes\n", no_of_nodes, total_mem/1024);
   // Initialize random number generators
   // C RNG for numbers of edges and weights
   srand( time( NULL ) );
@@ -89,12 +95,17 @@ void generate_random_graph (int no_of_nodes, int & edge_list_size, Node*& h_grap
     }
   }
 
+#ifdef _OPENMP
+  end_time = omp_get_wtime();
+  printf("Temp graph generation time: %lf seconds \n", (end_time - start_time));
+#endif		  
   //---------------
   // Step 2: convert the temp graph into two lists : nodes and edges
   //
   // allocate host memory
   h_graph_nodes = (Node*) malloc(sizeof(Node)*no_of_nodes);
   total_mem += sizeof(Node)*no_of_nodes;
+  printf ("Adding Final graph count=%d, Memory Footprint=%zu k bytes\n", no_of_nodes, total_mem/1024);
 
   ulong totalEdges = 0;
   // initalize the memory
@@ -113,6 +124,7 @@ void generate_random_graph (int no_of_nodes, int & edge_list_size, Node*& h_grap
 
   h_graph_edges = (int*) malloc(sizeof(int)*edge_list_size);
   total_mem += sizeof(int)*edge_list_size;
+  printf ("Adding final graph edge count=%d, Memory Footprint=%zu k bytes\n", edge_list_size, total_mem/1024);
   int edge_id=0;
   for ( ulong i = 0; i < no_of_nodes; i++ )
     for ( uint j = 0; j < graph[i].size(); j++ )
@@ -121,6 +133,11 @@ void generate_random_graph (int no_of_nodes, int & edge_list_size, Node*& h_grap
       // cost is not used
     }
 
+#ifdef _OPENMP
+  start_time = omp_get_wtime();
+  printf("Final graph generation time: %lf seconds \n", (start_time - end_time)); // swap start and end time
+#endif		  
   delete[] graph; // release the temporary graph.
+  total_mem -= sizeof(node)*no_of_nodes;
 }
 

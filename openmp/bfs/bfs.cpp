@@ -69,7 +69,7 @@ struct Node
 };
 
 // a function provided by another file
-extern void generate_random_graph (int no_of_nodes, int & edge_list_size, Node*& h_graph_nodes, int*& h_graph_edges, int& source, int & total_mem);
+extern void generate_random_graph (int no_of_nodes, int & edge_list_size, Node*& h_graph_nodes, int*& h_graph_edges, int& source, size_t& total_mem);
 
 void BFSGraph(int argc, char** argv);
 
@@ -92,7 +92,7 @@ void Usage(int argc, char**argv){
 //       int* h_graph_edges  // edges with dest node id and cost (ignored)
 //       int source // source node id
 //       int total_mem   // memory accumulated so far
-void read_graph_file (char* input_f, int& no_of_nodes, int & edge_list_size, Node*& h_graph_nodes, int*& h_graph_edges, int& source, int & total_mem)
+void read_graph_file (char* input_f, int& no_of_nodes, int & edge_list_size, Node*& h_graph_nodes, int*& h_graph_edges, int& source, size_t& total_mem)
 {
   printf("Reading File\n");
   //Read in Graph from a file
@@ -159,7 +159,7 @@ void BFSGraph( int argc, char** argv)
         int edge_list_size = 0;
         char *input_f;
 	int	 num_omp_threads;
-	int total_mem=0; 
+	size_t total_mem=0; 
 	
 	if(argc!=3 && argc!=4){
 	  Usage(argc, argv);
@@ -214,7 +214,7 @@ void BFSGraph( int argc, char** argv)
 	h_cost[source]=0;
 	
 	printf("Start traversing the tree using %d threads\n", num_omp_threads);
-	printf ("Node count=%d, Edge count=%d, Memory Footprint=%d k bytes\n", no_of_nodes, edge_list_size, total_mem/1024);
+	printf ("Node count=%d, Edge count=%d, Memory Footprint=%zu k bytes\n", no_of_nodes, edge_list_size, total_mem/1024);
 	
 	int k=0;
 #ifdef OPEN
